@@ -1,4 +1,4 @@
-import { CustomBlending, DataTexture, FloatType, LinearFilter, Matrix4, Mesh, NearestFilter, OrthographicCamera, PlaneGeometry, RGBAFormat, ShaderMaterial, Texture, TextureFilter, Vector3, WebGLRenderer, WebGLRenderTarget } from "three";
+import { AdditiveBlending, CustomBlending, DataTexture, FloatType, LinearFilter, Matrix4, Mesh, MultiplyBlending, NearestFilter, NoBlending, NormalBlending, OrthographicCamera, PlaneGeometry, RGBAFormat, ShaderMaterial, Texture, TextureFilter, Vector3, WebGLRenderer, WebGLRenderTarget } from "three";
 import { MeshBVH, MeshBVHUniformStruct, shaderIntersectFunction, shaderStructs } from 'three-mesh-bvh';
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { DenoiseMaterial } from "./DenoiseMaterial";
@@ -6,6 +6,7 @@ import { DenoiseMaterial } from "./DenoiseMaterial";
 export type RaycastOptions = {
 	resolution: number,
 	casts: number,
+	samples: number,
 	denoise: false | {
 		sigma: number,
 		threshold: number,
@@ -48,7 +49,8 @@ export const generateLightmap = async (renderer: WebGLRenderer, positions: Textu
             casts: { value: options.casts },
 			lightPosition: { value: options.lightPosition },
 			lightSize: { value: options.lightSize },
-
+			opacity: { value: 1 },
+			sampleIndex: { value: 0 },
 			directLightEnabled: { value: options.directLightEnabled },
 			indirectLightEnabled: { value: options.indirectLightEnabled },
 			ambientLightEnabled: { value: options.ambientLightEnabled },
@@ -73,13 +75,16 @@ export const generateLightmap = async (renderer: WebGLRenderer, positions: Textu
 			uniform sampler2D positions;
 			uniform sampler2D normals;
             uniform int casts;
+			
 			uniform vec3 lightPosition;
 			uniform float lightSize;
+			uniform int sampleIndex;
 
 			uniform bool directLightEnabled;
 			uniform bool indirectLightEnabled;
 			uniform bool ambientLightEnabled;
 			uniform float ambientDistance;
+			uniform float opacity;
 
 			uniform BVH bvh;
 			varying vec2 vUv;
@@ -150,7 +155,7 @@ export const generateLightmap = async (renderer: WebGLRenderer, positions: Textu
 				vec4 position = texture2D(positions, vUv);
 				vec4 normal = texture2D(normals, vUv);
 				
-				rng_initialize( gl_FragCoord.xy, 0 );
+				rng_initialize( gl_FragCoord.xy, sampleIndex );
 				
 				vec3 rayOrigin = vec3(position.r, position.g, position.b);
 				vec3 rayDirection = vec3(normal.r, normal.g, normal.b);
@@ -227,6 +232,8 @@ export const generateLightmap = async (renderer: WebGLRenderer, positions: Textu
 						finalColor *= adverageAO;
 					}
 				}
+				
+				finalColor.a = opacity;
 
 				gl_FragColor = finalColor;
 			}
@@ -254,15 +261,47 @@ export const generateLightmap = async (renderer: WebGLRenderer, positions: Textu
 	const orthographicCamera2 = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
     
-    console.log(`💡 Rendering lightmap...`);
+	rtMaterial.transparent = true;
+	rtMaterial.blending = NormalBlending;
+
+// 	NoBlending
+// 
+// AdditiveBlending
+// SubtractiveBlending
+// MultiplyBlending
+// CustomBlending
+    
 
     timeStated = Date.now();
-
+	renderer.autoClear = false;
+	renderer.autoClearColor = false;
+	renderer.autoClearDepth = false;
+	
 	renderer.setRenderTarget(renderTexture);
+	
+	
+	
 
-	renderer.render(mesh, orthographicCamera2);
+	console.log(`💡 Rendering lightmap...`);
 
-    console.log(`💡 Lightmap rendered in ${Date.now() - timeStated}ms`);
+	for (let i = 0; i < options.samples; i++) {
+		rtMaterial.uniforms.sampleIndex.value = i;
+		rtMaterial.uniforms.opacity.value = i == 0 ? 1 : 1 / options.samples;
+		renderer.render(mesh, orthographicCamera2);
+		console.log(`💡 Rendering lightmap sample ${i + 1}/${options.samples}`);
+		await wait(100);
+	}
+
+	console.log(`💡 Lightmap rendered in ${Date.now() - timeStated}ms`);
+
+
+	
+	// const mesh2 = new Mesh(new PlaneGeometry(2, 2), rtMaterial);
+	// renderer.setRenderTarget(renderTexture);
+	// renderer.render(mesh, orthographicCamera2);
+
+
+    
 
     timeStated = Date.now();
 	

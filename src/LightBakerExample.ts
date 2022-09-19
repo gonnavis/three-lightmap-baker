@@ -1,4 +1,4 @@
-import { Color, DirectionalLight, DoubleSide, LinearFilter, Mesh, MeshBasicMaterial, MeshStandardMaterial, NearestFilter, Object3D, PerspectiveCamera, PlaneGeometry, Scene, Texture, Vector3, WebGLRenderer, WebGLRenderTarget } from 'three';
+import { BoxGeometry, Color, DirectionalLight, DoubleSide, LinearFilter, Mesh, MeshBasicMaterial, MeshStandardMaterial, NearestFilter, Object3D, PerspectiveCamera, PlaneGeometry, Scene, Texture, Vector3, WebGLRenderer, WebGLRenderTarget } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls';
 import { Pane } from 'tweakpane';
@@ -36,7 +36,7 @@ export class LightBakerExample {
     directionalLight: DirectionalLight;
 
     lightDummy: Object3D;
-    light: TransformControls;
+    lightTranformController: TransformControls;
 
     currentModel: Object3D;
     currentModelMeshs: Mesh[] = [];
@@ -49,10 +49,11 @@ export class LightBakerExample {
     options = {
         model: "gm_construct",
         renderMode: "lightmap",
-        lightMapSize: 512,
+        lightMapSize: 1024,
         casts: 40,
         filterMode: "linear",
         denoise: true,
+        samples: 1,
         denoiseOptions: {
             sigma: 2.5,
             threshold: 0.2,
@@ -87,14 +88,14 @@ export class LightBakerExample {
         this.lightDummy = new Object3D();
         this.lightDummy.position.set(15.0, 10.0, 8.0);
 
-        this.light = new TransformControls(this.camera, this.renderer.domElement);
-        this.light.addEventListener('dragging-changed', (event) => {
+        this.lightTranformController = new TransformControls(this.camera, this.renderer.domElement);
+        this.lightTranformController.addEventListener('dragging-changed', (event) => {
             this.controls.enabled = !event.value;
             
         });
-        this.light.attach(this.lightDummy);
+        this.lightTranformController.attach(this.lightDummy);
         this.scene.add(this.lightDummy);
-        this.scene.add(this.light);
+        this.scene.add(this.lightTranformController);
 
         const pane = new Pane();
         pane.addInput(this.options, 'model', {
@@ -105,7 +106,7 @@ export class LightBakerExample {
         }).on('change', () => this.onRenderModeChange());
 
         pane.addInput(this.options, 'lightMapSize', {
-            max: 4096,
+            max: 8192,
             min: 128,
             step: 128
         });
@@ -113,6 +114,12 @@ export class LightBakerExample {
         pane.addInput(this.options, 'casts', {
             max: 500,
             min: 1
+        });
+
+        pane.addInput(this.options, 'samples', {
+            max: 10,
+            min: 1,
+            step: 1,
         });
 
         pane.addInput(this.options, 'directLightEnabled');
@@ -159,7 +166,6 @@ export class LightBakerExample {
         });
 
         
-
         pane.addButton({
             title: 'Render'
         }).on('click', () => this.generateLightmap());
@@ -216,6 +222,7 @@ export class LightBakerExample {
         const lightmapperOptions: RaycastOptions = {
             resolution: resolution,
             casts: this.options.casts,
+            samples: this.options.samples,
             filterMode: this.options.filterMode == "linear" ? LinearFilter : NearestFilter,
             denoise: this.options.denoise ? this.options.denoiseOptions : false,
             lightPosition: this.lightDummy.position,
@@ -224,10 +231,15 @@ export class LightBakerExample {
             ambientLightEnabled: this.options.ambientLightEnabled,
             directLightEnabled: this.options.directLightEnabled,
             indirectLightEnabled: this.options.indirectLightEnabled,
+            
         }
+
+        this.lightTranformController.visible = false;
 
         const lightmapTexture = await generateLightmap(this.renderer, atlas.positionTexture.texture, atlas.normalTexture.texture, this.currentModelMeshs, lightmapperOptions);
         this.lightmapTexture = lightmapTexture;
+
+        this.lightTranformController.visible = true;
 
         this.onRenderModeChange();
     }
@@ -252,6 +264,7 @@ export class LightBakerExample {
 
     debugPosition: Mesh;
     debugNormals: Mesh;
+    debugLightmap: Mesh;
 
     onDebugTexturesChange() {
         if(this.debugPosition) {
@@ -262,9 +275,14 @@ export class LightBakerExample {
             this.scene.remove(this.debugNormals);
         }
 
+        if(this.debugLightmap) {
+            this.scene.remove(this.debugLightmap);
+        }
+
         if(this.options.debugTextures) {
             this.debugPosition = this.createDebugTexture(this.positionTexture.texture, new Vector3(0, 10, 0));
             this.debugNormals = this.createDebugTexture(this.normalTexture.texture, new Vector3(12, 10, 0));
+            this.debugLightmap = this.createDebugTexture(this.lightmapTexture, new Vector3(24, 10, 0));
         }
     }
 
