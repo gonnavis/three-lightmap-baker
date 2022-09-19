@@ -24,22 +24,23 @@
 
 
 ## How it works
-1. We pass all the geomerty we want to lightbake into XAtlas. This will generate us a shared UV2 attribute.
-2. We then render the UVs to two textures (texture resolution being the lightmap resolution). **World Position map** & **Normal map**
+1. Pass all the geomerty into [XAtlas-Three](https://github.com/repalash/xatlas-three/) (UV unwrapping library). This will generate a "UV2" attribute on the geometry.
+2. Render the geomerties vericies in the UV2 space. Create two textures (resolution being the lightmap resolution), using the gl_FragColor to encode **world position** and the **normal**. This is packing Vec3 data into a texture using the RGB channel.
 
 ![alt text](screenshots/lightmap6.png)
 ![alt text](screenshots/lightmap_combo.png)
-**Visual reference:** When using these textures as the lightmap (using UV2). 
+**Visual reference:** Using these textures as the lightmap (using UV2). 
 
-3. We've effectivly split the map up into a pixel grid. We have both the world position & normal of each "pixel".
-4. This is useful as we can then cast rays from each one of the pixels world position in a hemisphere in the direction of the normal and calculate how much light that "pixel" receives. 
+3. These two texture are effectivly a 2D array of World Position & Normals covering the entire geomerty.
+4. Itterate through each World Position & Normal. Cast rays at each position to calculate incoming light.
 
 ![alt text](screenshots/lightmap_pixels.png)
 **Visual reference:** Creating arrows for each world positon & the normal
 
 
 ![alt text](screenshots/lightmap5.png)
-5. Using the Three Mesh BVH library we can generate a BVH Mesh to speed up the raycasting. It also supports casting the rays on the GPU via a shader (this is super fast). Using A LOT of copy & pasted code from Three GPU Pathtracer we can simulate light!
+5. The Three Mesh BVH library helps improve the performance of raycasting, it also allows raycasting on the GPU (this is super fast). 
+6. Using A LOT of copy & pasted code from Three GPU Pathtracer to generate light
 
 ## Further Reading / Watching
  - [I made a better Ray-Tracing engine](https://www.youtube.com/watch?v=A61S_2swwAc)
