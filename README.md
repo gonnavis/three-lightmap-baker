@@ -3,6 +3,7 @@
 <h4 align="center">Basic example of lightmapping in ThreeJS</h4>
 <h4 align="center">✨ Big Thanks for <a href="https://github.com/gkjohnson/three-mesh-bvh">Three Mesh BVH</a> & <a href="https://github.com/gkjohnson/three-gpu-pathtracer">Three GPU Pathtracer</a> for been excellent libraries ✨</h4>
 
+##  [Live Demo](https://lucas-jones.github.io/three-lightmap-baker/)
  
 ## Todo
  - High casts can cause the WebGL context to timeout
