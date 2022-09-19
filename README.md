@@ -3,8 +3,6 @@
 <h4 align="center">Basic example of lightmapping in ThreeJS</h4>
 <h4 align="center">✨ Big Thanks for <a href="https://github.com/gkjohnson/three-mesh-bvh">Three Mesh BVH</a> & <a href="https://github.com/gkjohnson/three-gpu-pathtracer">Three GPU Pathtracer</a> for been excellent libraries ✨</h4>
 
-</br>
-
  
 ## Todo
  - High casts can cause the WebGL context to timeout
@@ -15,8 +13,8 @@
  - Denoise offline (using Optix)
  - Try import/use more GPU Pathtracer logic
  - Multiple lights, light types, light colour
- 
-</br>
+ - Remove copyrighted maps...
+
 
 ## Examples
 
@@ -24,7 +22,6 @@
 ![alt text](screenshots/lightmap7.png)
 ![alt text](screenshots/lightmap8.png)
 
-</br>
 
 ## How it works
 1. We pass all the geomerty we want to lightbake into XAtlas. This will generate us a shared UV2 attribute.
@@ -42,7 +39,7 @@
 
 
 ![alt text](screenshots/lightmap5.png)
-5. Using A LOT of copy & pasted code from Three GPU Pathtracer we can simulate light!
+5. Using the Three Mesh BVH library we can generate a BVH Mesh to speed up the raycasting. It also supports casting the rays on the GPU via a shader (this is super fast). Using A LOT of copy & pasted code from Three GPU Pathtracer we can simulate light!
 
 ## Further Reading / Watching
  - [I made a better Ray-Tracing engine](https://www.youtube.com/watch?v=A61S_2swwAc)
