@@ -46,6 +46,10 @@ export class LightBakerExample {
     normalTexture: WebGLRenderTarget;
     lightmapTexture: Texture;
 
+    debugPosition: Mesh;
+    debugNormals: Mesh;
+    debugLightmap: Mesh;
+
     options = {
         model: "gm_construct",
         renderMode: "lightmap",
@@ -260,11 +264,6 @@ export class LightBakerExample {
 
         return debugTexture
     }
-
-
-    debugPosition: Mesh;
-    debugNormals: Mesh;
-    debugLightmap: Mesh;
 
     onDebugTexturesChange() {
         if(this.debugPosition) {

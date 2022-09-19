@@ -137,8 +137,6 @@ export const renderAtlas = (renderer: WebGLRenderer, meshs: Mesh[], resolution: 
         material.uniforms.offset.value.y = 0;
         renderer.render(lightMapMeshes, orthographicCamera)
 
-        // var pixels = new Float32Array(resolution * resolution * 4);
-        // renderer.readRenderTargetPixels(target, 0, 0, resolution, resolution, pixels);
         renderer.setRenderTarget(null);
         
         return [ target, null ];

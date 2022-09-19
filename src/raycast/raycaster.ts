@@ -1,4 +1,4 @@
-import { AdditiveBlending, CustomBlending, DataTexture, FloatType, LinearFilter, Matrix4, Mesh, MultiplyBlending, NearestFilter, NoBlending, NormalBlending, OrthographicCamera, PlaneGeometry, RGBAFormat, ShaderMaterial, Texture, TextureFilter, Vector3, WebGLRenderer, WebGLRenderTarget } from "three";
+import { AdditiveBlending, CustomBlending, FloatType, LinearFilter, Matrix4, Mesh, NormalBlending, OrthographicCamera, PlaneGeometry, ShaderMaterial, Texture, TextureFilter, Vector3, WebGLRenderer, WebGLRenderTarget } from "three";
 import { MeshBVH, MeshBVHUniformStruct, shaderIntersectFunction, shaderStructs } from 'three-mesh-bvh';
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { DenoiseMaterial } from "./DenoiseMaterial";
@@ -264,14 +264,6 @@ export const generateLightmap = async (renderer: WebGLRenderer, positions: Textu
 	rtMaterial.transparent = true;
 	rtMaterial.blending = NormalBlending;
 
-// 	NoBlending
-// 
-// AdditiveBlending
-// SubtractiveBlending
-// MultiplyBlending
-// CustomBlending
-    
-
     timeStated = Date.now();
 	renderer.autoClear = false;
 	renderer.autoClearColor = false;
@@ -279,9 +271,6 @@ export const generateLightmap = async (renderer: WebGLRenderer, positions: Textu
 	
 	renderer.setRenderTarget(renderTexture);
 	
-	
-	
-
 	console.log(`💡 Rendering lightmap...`);
 
 	for (let i = 0; i < options.samples; i++) {
@@ -293,20 +282,6 @@ export const generateLightmap = async (renderer: WebGLRenderer, positions: Textu
 	}
 
 	console.log(`💡 Lightmap rendered in ${Date.now() - timeStated}ms`);
-
-
-	
-	// const mesh2 = new Mesh(new PlaneGeometry(2, 2), rtMaterial);
-	// renderer.setRenderTarget(renderTexture);
-	// renderer.render(mesh, orthographicCamera2);
-
-
-    
-
-    timeStated = Date.now();
-	
-
-    console.log(`💡 Lightmap read in ${Date.now() - timeStated}ms`);
 
     if(options.denoise) {
         const renderDenoiseTexture = new WebGLRenderTarget(options.resolution, options.resolution, { type: FloatType, magFilter: options.filterMode, minFilter: options.filterMode });
