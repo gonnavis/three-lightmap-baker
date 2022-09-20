@@ -8,7 +8,7 @@
 
 ## Todo
  - High casts can cause the WebGL context to timeout
- - Export models & lightmaps
+ - Import & Export models & lightmaps
  - Bounce lighting
  - Albedo & Emissive textures
  - Only denoise indirect light & AO
@@ -18,6 +18,7 @@
  - Remove copyrighted maps...
  - Downscaling
  - Seperate AO map
+ - Generate & export light probes
 
 ## Examples
 
